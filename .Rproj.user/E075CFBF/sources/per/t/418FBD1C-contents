@@ -14,10 +14,12 @@ df <- as.data.frame(fread("./data/data.tsv"))
 
 #Validate and inspect the file, I think using EQ_PRIMARY is the best idicator of the 
 #magnitude. 
-
 str(df)
 head(df)
 summary(df)
 dim(df)
 colnames(df)
+
+plot(y=df$EQ_PRIMARY, x=df$YEAR, main="Earthquake Magnitudes Over Time", 
+      xlab="Observations", ylab="Magnitude", col="Red")
 
