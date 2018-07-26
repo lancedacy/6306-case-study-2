@@ -6,6 +6,7 @@ library(ggplot2)
 library(data.table)
 library(usmap)
 library(maps)
+library(plyr)
 
 #Direct download from NOAA
 url <- "https://www.ngdc.noaa.gov/nndc/struts/results?type_0=Exact&query_0=$ID&t=101650&s=13&d=189&dfn=signif.txt"
@@ -62,8 +63,6 @@ StateDB <- rbind(StateDB, DistrictColumbia)
 
 #Hold total damages by state
 DamagesCount <- data.frame(table(df_state$STATE))
-DamagesCount2 <- data.frame(table(df_state$STATE))
-
 
 #rename column names
 colnames(DamagesCount)[colnames(DamagesCount)=='Var1'] <- 'State'
@@ -77,14 +76,47 @@ DamagesCount
 #Merge DamagesCount to the statepop data set by state name
 DamagesCountMap <- merge(statepop, DamagesCount, by.x=("full"), by.y=("StateName"))
 
-
-
 #Plot states and color by damage total
 usmap::plot_usmap(data = DamagesCountMap,
                   values = "NumberOfDamagesByState",
                   lines = "black") + scale_fill_continuous(
                     low = "green",
                     high = "red",
+                    name = "Damage Counts",
+                    label = scales::comma) + theme(legend.position = "right")+
+  labs(title = "Total Counts by State")
+
+
+#Damages total in millions
+DamagesTotal <- aggregate(df_state$TOTAL_DAMAGE_MILLIONS_DOLLARS ~ df_state$STATE, data = df_state, sum)
+
+#rename column names
+colnames(DamagesTotal)[colnames(DamagesTotal)=='df_state$STATE'] <- 'State'
+colnames(DamagesTotal)[colnames(DamagesTotal)=='df_state$TOTAL_DAMAGE_MILLIONS_DOLLARS'] <- 'TotalDamagesByState'
+
+DamagesTotal <- merge(DamagesTotal, StateDB, by.x=("State"), by.y=("State"))
+DamagesTotal <- DamagesTotal[order(DamagesTotal$TotalDamagesByState, decreasing=TRUE),c(3,2)]
+DamagesTotal
+
+#Merge DamagesCount to the statepop data set by state name
+DamagesTotalMap <- merge(statepop, DamagesTotal, by.x=("full"), by.y=("StateName"))
+
+#Plot states and color by damage total
+usmap::plot_usmap(data = DamagesTotalMap,
+                  values = "TotalDamagesByState",
+                  lines = "black") + scale_fill_continuous(
+                    low = "green",
+                    high = "red",
                     name = "Damages (in millions)",
                     label = scales::comma) + theme(legend.position = "right")+
   labs(title = "Total Damages by State")
+
+#Just playing around with plot_usmap to see total population
+usmap::plot_usmap(data = statepop,
+                  values = "pop_2015",
+                  lines = "black") + scale_fill_continuous(
+                    low = "green",
+                    high = "red",
+                    name = "Popluation",
+                    label = scales::comma) + theme(legend.position = "right")+
+  labs(title = "Total Population")
