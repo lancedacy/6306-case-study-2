@@ -1,5 +1,6 @@
 library(randomForest)
-
+#Based on magntitude, coordinates, and time can we predict the next earthquake
+#RandomForest, XGBoost, Deep Learning
 
 #Example using iris data built-in
 data(iris)
@@ -23,3 +24,4 @@ getTree(randomForest(iris[,-5], iris[,5], ntree=10), 3, labelVar=TRUE)
 iris.rf <- randomForest(Species ~ ., iris, ntree=50, norm.votes=FALSE)
 iris.rf <- grow(iris.rf, 50)
 print(iris.rf)
+
